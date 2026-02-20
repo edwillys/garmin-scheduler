@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "garmin-scheduler"
+version = "0.1.0"
+description = "Uploads data from Garmin to Google Drive according to a schedule"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "garth",
+  "google-api-python-client",
+  "google-auth",
+  "google-auth-oauthlib",
+]
+
+[project.optional-dependencies]
+dev = [
+  "black",
+  "flake8",
+  "isort",
+  "pre-commit",
+]
+
+[tool.setuptools]
+py-modules = ["sync_swim", "generate_garmin_session"]
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+
+[tool.isort]
+profile = "black"
+line_length = 88

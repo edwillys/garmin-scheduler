@@ -1,0 +1,9 @@
+# Non-secret sync settings for sync_swim.py
+
+[sync]
+# Garmin activity type key to sync. Common examples:
+#   lap_swimming, swimming, running, cycling, walking
+activity_type = "lap_swimming"
+
+# How many recent activities to inspect on Garmin
+num_last_activities = 5

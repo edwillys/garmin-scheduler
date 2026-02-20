@@ -9,10 +9,12 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
@@ -21,7 +23,29 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install garth google-api-python-client google-auth google-auth-oauthlib
+          pip install '.[dev]'
+
+      - name: Format (black)
+        run: |
+          python -m black .
+
+      - name: Commit formatting changes
+        shell: bash
+        run: |
+          if git diff --quiet; then
+            echo "No formatting changes to commit."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: format with black"
+          git push
+
+      - name: Lint (flake8)
+        run: |
+          python -m flake8 || echo "::warning::flake8 reported issues"
 
       - name: Run sync script
         env:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Sync Garmin swimming activities to Google Drive."""
+"""Sync Garmin activities to Google Drive."""
 
 import base64
 import hashlib
@@ -7,6 +7,7 @@ import io
 import json
 import os
 import tempfile
+import tomllib
 from pathlib import Path
 
 import garth
@@ -49,6 +50,15 @@ def load_dotenv(dotenv_path: Path) -> dict[str, str]:
 DOTENV_VALUES = load_dotenv(Path(__file__).with_name(".env"))
 
 
+def load_toml(path: Path) -> dict:
+    if not path.exists():
+        return {}
+    return tomllib.loads(path.read_text(encoding="utf-8"))
+
+
+SYNC_SETTINGS = load_toml(Path(__file__).with_name("sync_settings.toml"))
+
+
 def get_config(name: str, default: str | None = None) -> str:
     """Read config from .env first, then os.environ, then default."""
     if name in DOTENV_VALUES:
@@ -60,7 +70,6 @@ def get_config(name: str, default: str | None = None) -> str:
     raise KeyError(name)
 
 
-NUM_LAST_ACTIVITIES = int(get_config("NUM_LAST_ACTIVITIES", "5"))
 GDRIVE_FOLDER_ID = get_config("GDRIVE_FOLDER_ID")
 GDRIVE_CREDENTIALS = get_config("GDRIVE_CREDENTIALS")
 GARMIN_SESSION = get_config("GARMIN_SESSION")
@@ -69,6 +78,15 @@ GDRIVE_TOKEN_JSON = DOTENV_VALUES.get("GDRIVE_TOKEN_JSON") or os.environ.get(
 )
 
 GDRIVE_SCOPES = ["https://www.googleapis.com/auth/drive.file"]
+
+
+def get_sync_setting(name: str, default):
+    sync = SYNC_SETTINGS.get("sync", {})
+    return sync.get(name, default)
+
+
+ACTIVITY_TYPE_KEY = str(get_sync_setting("activity_type", "lap_swimming"))
+NUM_LAST_ACTIVITIES = int(get_sync_setting("num_last_activities", 5))
 
 
 def garmin_authenticate() -> None:
@@ -88,14 +106,13 @@ def garmin_authenticate() -> None:
             for member in members:
                 # Prevent path traversal: reject absolute paths and ".." components
                 if os.path.isabs(member.name) or ".." in member.name.split("/"):
-                    raise ValueError(
-                        f"Unsafe path in session archive: {member.name}")
+                    raise ValueError(f"Unsafe path in session archive: {member.name}")
             tar.extractall(garth_dir, members=members)
         garth.resume(garth_dir)
 
 
-def fetch_lap_swim_activities() -> list[dict]:
-    """Fetch the last NUM_LAST_ACTIVITIES activities and filter for lap swimming."""
+def fetch_activities(activity_type_key: str) -> list[dict]:
+    """Fetch the last NUM_LAST_ACTIVITIES activities and filter by type key."""
     activities = garth.connectapi(
         "/activitylist-service/activities/search/activities",
         params={"limit": NUM_LAST_ACTIVITIES, "start": 0},
@@ -103,7 +120,7 @@ def fetch_lap_swim_activities() -> list[dict]:
     return [
         a
         for a in activities
-        if a.get("activityType", {}).get("typeKey") == "lap_swimming"
+        if a.get("activityType", {}).get("typeKey") == activity_type_key
     ]
 
 
@@ -112,7 +129,20 @@ def activity_filename(activity: dict) -> str:
     activity_id = activity["activityId"]
     start_time = activity.get("startTimeLocal", "unknown")
     date_part = start_time[:10] if len(start_time) >= 10 else start_time
-    return f"lap_swim_{date_part}_{activity_id}.json"
+
+    # Backward-compat: keep the old prefix for lap swimming.
+    activity_type_key = (
+        activity.get("activityType", {}).get("typeKey") or ACTIVITY_TYPE_KEY
+    )
+    if activity_type_key == "lap_swimming":
+        prefix = "lap_swim"
+    else:
+        prefix = "activity_" + "".join(
+            ch if (ch.isalnum() or ch in "-_ ") else "_"
+            for ch in str(activity_type_key)
+        ).strip().replace(" ", "_")
+
+    return f"{prefix}_{date_part}_{activity_id}.json"
 
 
 def compute_checksum(data: bytes) -> str:
@@ -149,13 +179,23 @@ def gdrive_service():  # returns googleapiclient.discovery.Resource
                         "Install it with: pip install google-auth-oauthlib"
                     ) from exc
 
-                if "installed" not in credentials_info and "web" not in credentials_info:
+                if (
+                    "installed" not in credentials_info
+                    and "web" not in credentials_info
+                ):
                     raise ValueError(
                         "Unrecognized OAuth client JSON. Expected top-level key 'installed' or 'web'."
                     )
                 flow = InstalledAppFlow.from_client_config(
-                    credentials_info, GDRIVE_SCOPES)
+                    credentials_info, GDRIVE_SCOPES
+                )
                 credentials = flow.run_local_server(port=0)
+
+                print("\nOAuth token generated.")
+                print(
+                    "Set GDRIVE_TOKEN_JSON to the following value (keep it secret):\n"
+                    + credentials.to_json()
+                )
 
     return build("drive", "v3", credentials=credentials)
 
@@ -225,12 +265,20 @@ def explain_drive_quota_error(err: HttpError) -> None:
     if hasattr(err, "error_details") and err.error_details:
         details = json.dumps(err.error_details)
     message = str(err)
-    if "Service Accounts do not have storage quota" in message or "storageQuotaExceeded" in details:
-        print("Google Drive rejected the upload: service accounts have no My Drive quota.")
-        print("Sharing a My Drive folder with the service account grants permission, not storage quota.")
+    if (
+        "Service Accounts do not have storage quota" in message
+        or "storageQuotaExceeded" in details
+    ):
+        print(
+            "Google Drive rejected the upload: service accounts have no My Drive quota."
+        )
+        print(
+            "Sharing a My Drive folder with the service account grants permission, not storage quota."
+        )
         print("Use one of these options:")
         print(
-            "  1) Upload to a Shared Drive folder where this service account is a member.")
+            "  1) Upload to a Shared Drive folder where this service account is a member."
+        )
         print("  2) Switch to OAuth user credentials for My Drive uploads.")
 
 
@@ -245,18 +293,18 @@ def main() -> None:
     garmin_authenticate()
 
     print(f"Fetching last {NUM_LAST_ACTIVITIES} activities...")
-    lap_swim_activities = fetch_lap_swim_activities()
-    if not lap_swim_activities:
-        print("No lap swimming activities found.")
+    activities = fetch_activities(ACTIVITY_TYPE_KEY)
+    if not activities:
+        print(f"No activities found for type: {ACTIVITY_TYPE_KEY}")
         return
-    print(f"Found {len(lap_swim_activities)} lap swimming activity(ies).")
+    print(f"Found {len(activities)} activity(ies) of type {ACTIVITY_TYPE_KEY}.")
 
     print("Connecting to Google Drive...")
     service = gdrive_service()
     drive_files = list_drive_files(service)
 
     try:
-        for activity in lap_swim_activities:
+        for activity in activities:
             filename = activity_filename(activity)
             activity_id = activity["activityId"]
 
@@ -269,8 +317,7 @@ def main() -> None:
                 if existing.get("description") == checksum:
                     print(f"  Skipping (unchanged): {filename}")
                     continue
-                update_file(service, existing["id"],
-                            activity_data, filename, checksum)
+                update_file(service, existing["id"], activity_data, filename, checksum)
             else:
                 upload_file(service, activity_data, filename, checksum)
     except HttpError as err:

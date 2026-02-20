@@ -144,6 +144,12 @@ ENV/
 env.bak/
 venv.bak/
 
+# Local auth/token files (do not commit)
+.gdrive_token.json
+client_secret*.json
+*.gserviceaccount.com.json
+*service-account*.json
+
 # Spyder project settings
 .spyderproject
 .spyproject
