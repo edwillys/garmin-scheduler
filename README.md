@@ -8,6 +8,7 @@ Edit [sync_settings.toml](sync_settings.toml):
 
 - `sync.activity_type`: Garmin activity type key to sync (e.g. `lap_swimming`, `swimming`, `running`).
 - `sync.num_last_activities`: how many recent activities to inspect.
+- `sync.detail_level`: `summary` or `detailed` (includes laps/splits/metrics when available).
 
 **Secrets / env vars**
 
@@ -43,8 +44,7 @@ Dev tools:
 2) Set `GDRIVE_CREDENTIALS` to the downloaded client JSON (as a JSON string).
 3) Run `python sync_activity.py` once locally.
    - A browser window opens for consent.
-   - The script will write a token file `.gdrive_token.json` (unless you already provided `GDRIVE_TOKEN_JSON`).
-4) Copy the contents of `.gdrive_token.json` into `GDRIVE_TOKEN_JSON` for headless runs.
+   - The script prints a JSON token; copy it into `GDRIVE_TOKEN_JSON`.
 
 ## GitHub Actions (no browser)
 

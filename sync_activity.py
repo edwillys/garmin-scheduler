@@ -87,6 +87,7 @@ def get_sync_setting(name: str, default):
 
 ACTIVITY_TYPE_KEY = str(get_sync_setting("activity_type", "lap_swimming"))
 NUM_LAST_ACTIVITIES = int(get_sync_setting("num_last_activities", 5))
+DETAIL_LEVEL = str(get_sync_setting("detail_level", "summary")).lower().strip()
 
 
 def garmin_authenticate() -> None:
@@ -283,9 +284,30 @@ def explain_drive_quota_error(err: HttpError) -> None:
 
 
 def fetch_activity_json(activity_id: int | str) -> bytes:
-    """Fetch the full JSON data for a single activity."""
-    data = garth.connectapi(f"/activity-service/activity/{activity_id}")
-    return json.dumps(data, indent=2).encode()
+    """Fetch JSON data for a single activity.
+
+    detail levels:
+      - summary: /activity-service/activity/{id}
+      - detailed: adds /activity-service/activity/{id}/details when available
+    """
+
+    summary = garth.connectapi(f"/activity-service/activity/{activity_id}")
+
+    if DETAIL_LEVEL == "summary":
+        return json.dumps(summary, indent=2).encode()
+
+    payload: dict[str, object] = {"summary": summary}
+
+    def try_fetch(name: str, path: str, params: dict | None = None) -> None:
+        try:
+            payload[name] = garth.connectapi(path, params=params)
+        except Exception:
+            return
+
+    # This endpoint typically includes laps/splits/metrics depending on activity type.
+    try_fetch("details", f"/activity-service/activity/{activity_id}/details")
+
+    return json.dumps(payload, indent=2).encode()
 
 
 def main() -> None:

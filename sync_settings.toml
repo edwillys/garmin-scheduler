@@ -7,3 +7,8 @@ activity_type = "lap_swimming"
 
 # How many recent activities to inspect on Garmin
 num_last_activities = 5
+
+# Level of detail stored per activity:
+#   "summary"  -> only /activity-service/activity/{id}
+#   "detailed" -> adds /details (laps/splits/metrics when available)
+detail_level = "detailed"
