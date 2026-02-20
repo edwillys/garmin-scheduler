@@ -24,7 +24,7 @@ dev = [
 ]
 
 [tool.setuptools]
-py-modules = ["sync_swim", "generate_garmin_session"]
+py-modules = ["sync_activity", "generate_garmin_session"]
 
 [tool.black]
 line-length = 88

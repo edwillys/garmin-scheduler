@@ -41,7 +41,7 @@ Dev tools:
    - Create an OAuth Client ID of type **Desktop app**.
    - Download the client JSON.
 2) Set `GDRIVE_CREDENTIALS` to the downloaded client JSON (as a JSON string).
-3) Run `python sync_swim.py` once locally.
+3) Run `python sync_activity.py` once locally.
    - A browser window opens for consent.
    - The script will write a token file `.gdrive_token.json` (unless you already provided `GDRIVE_TOKEN_JSON`).
 4) Copy the contents of `.gdrive_token.json` into `GDRIVE_TOKEN_JSON` for headless runs.
@@ -57,7 +57,7 @@ Add these repository secrets:
 - `GDRIVE_CREDENTIALS` (OAuth client JSON)
 - `GDRIVE_TOKEN_JSON` (OAuth token JSON)
 
-The workflow in [.github/workflows/daily_sync.yml](.github/workflows/daily_sync.yml) reads these secrets and runs `sync_swim.py` headlessly.
+The workflow in [.github/workflows/daily_sync.yml](.github/workflows/daily_sync.yml) reads these secrets and runs `sync_activity.py` headlessly.
 
 ## Formatting / linting
 

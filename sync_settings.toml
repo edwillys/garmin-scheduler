@@ -1,4 +1,4 @@
-# Non-secret sync settings for sync_swim.py
+# Non-secret sync settings for sync_activity.py
 
 [sync]
 # Garmin activity type key to sync. Common examples:
