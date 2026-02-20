@@ -3,19 +3,70 @@
 
 import base64
 import hashlib
+import io
 import json
 import os
 import tempfile
+from pathlib import Path
 
 import garth
+from google.auth.transport.requests import Request
 from google.oauth2 import service_account
+from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
+from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaIoBaseUpload
 
-NUM_LAST_ACTIVITIES = int(os.environ.get("NUM_LAST_ACTIVITIES", "30"))
-GDRIVE_FOLDER_ID = os.environ["GDRIVE_FOLDER_ID"]
-GDRIVE_CREDENTIALS = os.environ["GDRIVE_CREDENTIALS"]
-GARMIN_SESSION = os.environ["GARMIN_SESSION"]
+
+def load_dotenv(dotenv_path: Path) -> dict[str, str]:
+    """Load a simple .env file into a dictionary."""
+    values: dict[str, str] = {}
+    if not dotenv_path.exists():
+        return values
+
+    with dotenv_path.open("r", encoding="utf-8") as file_obj:
+        for raw_line in file_obj:
+            line = raw_line.strip()
+            if not line or line.startswith("#"):
+                continue
+            if line.startswith("export "):
+                line = line[7:].strip()
+            if "=" not in line:
+                continue
+
+            key, value = line.split("=", 1)
+            key = key.strip()
+            value = value.strip()
+
+            if value and value[0] in {'"', "'"} and value[-1] == value[0]:
+                value = value[1:-1]
+
+            values[key] = value
+
+    return values
+
+
+DOTENV_VALUES = load_dotenv(Path(__file__).with_name(".env"))
+
+
+def get_config(name: str, default: str | None = None) -> str:
+    """Read config from .env first, then os.environ, then default."""
+    if name in DOTENV_VALUES:
+        return DOTENV_VALUES[name]
+    if name in os.environ:
+        return os.environ[name]
+    if default is not None:
+        return default
+    raise KeyError(name)
+
+
+NUM_LAST_ACTIVITIES = int(get_config("NUM_LAST_ACTIVITIES", "5"))
+GDRIVE_FOLDER_ID = get_config("GDRIVE_FOLDER_ID")
+GDRIVE_CREDENTIALS = get_config("GDRIVE_CREDENTIALS")
+GARMIN_SESSION = get_config("GARMIN_SESSION")
+GDRIVE_TOKEN_JSON = DOTENV_VALUES.get("GDRIVE_TOKEN_JSON") or os.environ.get(
+    "GDRIVE_TOKEN_JSON"
+)
 
 GDRIVE_SCOPES = ["https://www.googleapis.com/auth/drive.file"]
 
@@ -37,13 +88,14 @@ def garmin_authenticate() -> None:
             for member in members:
                 # Prevent path traversal: reject absolute paths and ".." components
                 if os.path.isabs(member.name) or ".." in member.name.split("/"):
-                    raise ValueError(f"Unsafe path in session archive: {member.name}")
+                    raise ValueError(
+                        f"Unsafe path in session archive: {member.name}")
             tar.extractall(garth_dir, members=members)
         garth.resume(garth_dir)
 
 
-def fetch_swim_activities() -> list[dict]:
-    """Fetch the last NUM_LAST_ACTIVITIES activities and filter for swimming."""
+def fetch_lap_swim_activities() -> list[dict]:
+    """Fetch the last NUM_LAST_ACTIVITIES activities and filter for lap swimming."""
     activities = garth.connectapi(
         "/activitylist-service/activities/search/activities",
         params={"limit": NUM_LAST_ACTIVITIES, "start": 0},
@@ -51,7 +103,7 @@ def fetch_swim_activities() -> list[dict]:
     return [
         a
         for a in activities
-        if a.get("activityType", {}).get("typeKey") == "swimming"
+        if a.get("activityType", {}).get("typeKey") == "lap_swimming"
     ]
 
 
@@ -60,7 +112,7 @@ def activity_filename(activity: dict) -> str:
     activity_id = activity["activityId"]
     start_time = activity.get("startTimeLocal", "unknown")
     date_part = start_time[:10] if len(start_time) >= 10 else start_time
-    return f"swim_{date_part}_{activity_id}.json"
+    return f"lap_swim_{date_part}_{activity_id}.json"
 
 
 def compute_checksum(data: bytes) -> str:
@@ -71,9 +123,40 @@ def compute_checksum(data: bytes) -> str:
 def gdrive_service():  # returns googleapiclient.discovery.Resource
     """Build and return an authenticated Google Drive service."""
     credentials_info = json.loads(GDRIVE_CREDENTIALS)
-    credentials = service_account.Credentials.from_service_account_info(
-        credentials_info, scopes=GDRIVE_SCOPES
-    )
+
+    if credentials_info.get("type") == "service_account":
+        credentials = service_account.Credentials.from_service_account_info(
+            credentials_info, scopes=GDRIVE_SCOPES
+        )
+    else:
+        credentials: Credentials | None = None
+
+        if GDRIVE_TOKEN_JSON:
+            credentials = Credentials.from_authorized_user_info(
+                json.loads(GDRIVE_TOKEN_JSON), scopes=GDRIVE_SCOPES
+            )
+
+        if not credentials or not credentials.valid:
+            if credentials and credentials.expired and credentials.refresh_token:
+                credentials.refresh(Request())
+            else:
+                try:
+                    from google_auth_oauthlib.flow import InstalledAppFlow
+                except ImportError as exc:
+                    raise RuntimeError(
+                        "No valid/refreshable OAuth token found in GDRIVE_TOKEN_JSON, "
+                        "and interactive login is required, but google-auth-oauthlib is not installed. "
+                        "Install it with: pip install google-auth-oauthlib"
+                    ) from exc
+
+                if "installed" not in credentials_info and "web" not in credentials_info:
+                    raise ValueError(
+                        "Unrecognized OAuth client JSON. Expected top-level key 'installed' or 'web'."
+                    )
+                flow = InstalledAppFlow.from_client_config(
+                    credentials_info, GDRIVE_SCOPES)
+                credentials = flow.run_local_server(port=0)
+
     return build("drive", "v3", credentials=credentials)
 
 
@@ -101,24 +184,32 @@ def list_drive_files(service) -> dict[str, dict]:
     return files
 
 
-def upload_file(service, local_path: str, filename: str, checksum: str) -> None:
+def upload_file(service, file_bytes: bytes, filename: str, checksum: str) -> None:
     """Upload a file to Google Drive, setting checksum in description."""
     file_metadata = {
         "name": filename,
         "parents": [GDRIVE_FOLDER_ID],
         "description": checksum,
     }
-    media = MediaFileUpload(local_path, mimetype="application/json")
+    media = MediaIoBaseUpload(
+        io.BytesIO(file_bytes),
+        mimetype="application/json",
+        resumable=False,
+    )
     service.files().create(body=file_metadata, media_body=media, fields="id").execute()
     print(f"Uploaded: {filename}")
 
 
 def update_file(
-    service, file_id: str, local_path: str, filename: str, checksum: str
+    service, file_id: str, file_bytes: bytes, filename: str, checksum: str
 ) -> None:
     """Update an existing file on Google Drive."""
     file_metadata = {"description": checksum}
-    media = MediaFileUpload(local_path, mimetype="application/json")
+    media = MediaIoBaseUpload(
+        io.BytesIO(file_bytes),
+        mimetype="application/json",
+        resumable=False,
+    )
     service.files().update(
         fileId=file_id,
         body=file_metadata,
@@ -126,6 +217,21 @@ def update_file(
         fields="id",
     ).execute()
     print(f"Updated: {filename}")
+
+
+def explain_drive_quota_error(err: HttpError) -> None:
+    """Print a clearer action message for service-account Drive quota errors."""
+    details = ""
+    if hasattr(err, "error_details") and err.error_details:
+        details = json.dumps(err.error_details)
+    message = str(err)
+    if "Service Accounts do not have storage quota" in message or "storageQuotaExceeded" in details:
+        print("Google Drive rejected the upload: service accounts have no My Drive quota.")
+        print("Sharing a My Drive folder with the service account grants permission, not storage quota.")
+        print("Use one of these options:")
+        print(
+            "  1) Upload to a Shared Drive folder where this service account is a member.")
+        print("  2) Switch to OAuth user credentials for My Drive uploads.")
 
 
 def fetch_activity_json(activity_id: int | str) -> bytes:
@@ -139,18 +245,18 @@ def main() -> None:
     garmin_authenticate()
 
     print(f"Fetching last {NUM_LAST_ACTIVITIES} activities...")
-    swim_activities = fetch_swim_activities()
-    if not swim_activities:
-        print("No swimming activities found.")
+    lap_swim_activities = fetch_lap_swim_activities()
+    if not lap_swim_activities:
+        print("No lap swimming activities found.")
         return
-    print(f"Found {len(swim_activities)} swimming activity(ies).")
+    print(f"Found {len(lap_swim_activities)} lap swimming activity(ies).")
 
     print("Connecting to Google Drive...")
     service = gdrive_service()
     drive_files = list_drive_files(service)
 
-    with tempfile.TemporaryDirectory() as tmpdir:
-        for activity in swim_activities:
+    try:
+        for activity in lap_swim_activities:
             filename = activity_filename(activity)
             activity_id = activity["activityId"]
 
@@ -158,18 +264,18 @@ def main() -> None:
             activity_data = fetch_activity_json(activity_id)
             checksum = compute_checksum(activity_data)
 
-            local_path = os.path.join(tmpdir, filename)
-            with open(local_path, "wb") as f:
-                f.write(activity_data)
-
             if filename in drive_files:
                 existing = drive_files[filename]
                 if existing.get("description") == checksum:
                     print(f"  Skipping (unchanged): {filename}")
                     continue
-                update_file(service, existing["id"], local_path, filename, checksum)
+                update_file(service, existing["id"],
+                            activity_data, filename, checksum)
             else:
-                upload_file(service, local_path, filename, checksum)
+                upload_file(service, activity_data, filename, checksum)
+    except HttpError as err:
+        explain_drive_quota_error(err)
+        raise
 
     print("Sync complete.")
 
