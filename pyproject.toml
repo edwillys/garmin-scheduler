@@ -13,6 +13,7 @@ dependencies = [
   "google-api-python-client",
   "google-auth",
   "google-auth-oauthlib",
+  "pyyaml",
 ]
 
 [project.optional-dependencies]
@@ -24,7 +25,13 @@ dev = [
 ]
 
 [tool.setuptools]
-py-modules = ["sync_activity", "generate_garmin_session"]
+py-modules = [
+  "sync_activity",
+  "generate_garmin_session",
+  "utils",
+  "schedule_workout",
+  "sync_workouts",
+]
 
 [tool.black]
 line-length = 88

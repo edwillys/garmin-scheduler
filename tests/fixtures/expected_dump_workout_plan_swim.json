@@ -1,0 +1,586 @@
+{
+  "avgTrainingSpeed": 0.0,
+  "description": "Tests all duration types, target types, and repeat structures.",
+  "estimateType": null,
+  "estimatedDistanceInMeters": null,
+  "estimatedDistanceUnit": null,
+  "estimatedDurationInSecs": null,
+  "poolLength": 50.0,
+  "poolLengthUnit": {
+    "factor": 100.0,
+    "unitId": 1,
+    "unitKey": "meter"
+  },
+  "sportType": {
+    "displayOrder": 1,
+    "sportTypeId": 4,
+    "sportTypeKey": "swimming"
+  },
+  "subSportType": null,
+  "workoutName": "Ultimate Script Stress Test 2026",
+  "workoutSegments": [
+    {
+      "segmentOrder": 1,
+      "sportType": {
+        "displayOrder": 1,
+        "sportTypeId": 4,
+        "sportTypeKey": "swimming"
+      },
+      "workoutSteps": [
+        {
+          "description": "Target: Heart Rate Zone 2",
+          "endCondition": {
+            "conditionTypeId": 2,
+            "conditionTypeKey": "time",
+            "displayOrder": 2,
+            "displayable": true
+          },
+          "endConditionValue": 600,
+          "equipmentType": {
+            "displayOrder": 0,
+            "equipmentTypeId": 0,
+            "equipmentTypeKey": null
+          },
+          "stepId": 1,
+          "stepOrder": 1,
+          "stepType": {
+            "displayOrder": 1,
+            "stepTypeId": 1,
+            "stepTypeKey": "warmup"
+          },
+          "targetType": {
+            "displayOrder": 4,
+            "workoutTargetTypeId": 4,
+            "workoutTargetTypeKey": "heart.rate.zone"
+          },
+          "type": "ExecutableStepDTO",
+          "zoneNumber": 2
+        },
+        {
+          "childStepId": 1,
+          "endCondition": {
+            "conditionTypeId": 7,
+            "conditionTypeKey": "iterations",
+            "displayOrder": 7,
+            "displayable": false
+          },
+          "numberOfIterations": 5,
+          "skipLastRestStep": false,
+          "smartRepeat": false,
+          "stepId": 2,
+          "stepOrder": 2,
+          "stepType": {
+            "displayOrder": 6,
+            "stepTypeId": 6,
+            "stepTypeKey": "repeat"
+          },
+          "type": "RepeatGroupDTO",
+          "workoutSteps": [
+            {
+              "description": "800m at Swim Pace Range per 100m (converted to m/s)",
+              "endCondition": {
+                "conditionTypeId": 3,
+                "conditionTypeKey": "distance",
+                "displayOrder": 3,
+                "displayable": true
+              },
+              "endConditionValue": 800.0,
+              "equipmentType": {
+                "displayOrder": 0,
+                "equipmentTypeId": 0,
+                "equipmentTypeKey": null
+              },
+              "secondaryTargetType": {
+                "displayOrder": 6,
+                "workoutTargetTypeId": 6,
+                "workoutTargetTypeKey": "pace.zone"
+              },
+              "secondaryTargetValueOne": 0.9090909090909091,
+              "secondaryTargetValueUnit": {
+                "factor": 100.0,
+                "unitId": 1,
+                "unitKey": "meter"
+              },
+              "stepId": 3,
+              "stepOrder": 3,
+              "stepType": {
+                "displayOrder": 3,
+                "stepTypeId": 3,
+                "stepTypeKey": "interval"
+              },
+              "strokeType": {
+                "displayOrder": 6,
+                "strokeTypeId": 6,
+                "strokeTypeKey": "free"
+              },
+              "targetType": {
+                "displayOrder": 6,
+                "workoutTargetTypeId": 6,
+                "workoutTargetTypeKey": "pace.zone"
+              },
+              "targetValueOne": 0.9090909090909091,
+              "type": "ExecutableStepDTO"
+            },
+            {
+              "description": "Fixed recovery (safe default).",
+              "endCondition": {
+                "conditionTypeId": 2,
+                "conditionTypeKey": "time",
+                "displayOrder": 2,
+                "displayable": true
+              },
+              "endConditionValue": 60,
+              "equipmentType": {
+                "displayOrder": 0,
+                "equipmentTypeId": 0,
+                "equipmentTypeKey": null
+              },
+              "stepId": 4,
+              "stepOrder": 4,
+              "stepType": {
+                "displayOrder": 4,
+                "stepTypeId": 4,
+                "stepTypeKey": "recovery"
+              },
+              "targetType": {
+                "workoutTargetTypeId": 1,
+                "workoutTargetTypeKey": "no.target"
+              },
+              "type": "ExecutableStepDTO"
+            }
+          ]
+        },
+        {
+          "childStepId": 1,
+          "endCondition": {
+            "conditionTypeId": 7,
+            "conditionTypeKey": "iterations",
+            "displayOrder": 7,
+            "displayable": false
+          },
+          "numberOfIterations": 2,
+          "skipLastRestStep": false,
+          "smartRepeat": false,
+          "stepId": 5,
+          "stepOrder": 5,
+          "stepType": {
+            "displayOrder": 6,
+            "stepTypeId": 6,
+            "stepTypeKey": "repeat"
+          },
+          "type": "RepeatGroupDTO",
+          "workoutSteps": [
+            {
+              "childStepId": 1,
+              "endCondition": {
+                "conditionTypeId": 7,
+                "conditionTypeKey": "iterations",
+                "displayOrder": 7,
+                "displayable": false
+              },
+              "numberOfIterations": 3,
+              "skipLastRestStep": false,
+              "smartRepeat": false,
+              "stepId": 6,
+              "stepOrder": 6,
+              "stepType": {
+                "displayOrder": 6,
+                "stepTypeId": 6,
+                "stepTypeKey": "repeat"
+              },
+              "type": "RepeatGroupDTO",
+              "workoutSteps": [
+                {
+                  "description": "Nested repeat: drill",
+                  "endCondition": {
+                    "conditionTypeId": 3,
+                    "conditionTypeKey": "distance",
+                    "displayOrder": 3,
+                    "displayable": true
+                  },
+                  "endConditionValue": 50.0,
+                  "equipmentType": {
+                    "displayOrder": 0,
+                    "equipmentTypeId": 2,
+                    "equipmentTypeKey": "kickboard"
+                  },
+                  "stepId": 7,
+                  "stepOrder": 7,
+                  "stepType": {
+                    "displayOrder": 3,
+                    "stepTypeId": 3,
+                    "stepTypeKey": "interval"
+                  },
+                  "strokeType": {
+                    "displayOrder": 4,
+                    "strokeTypeId": 4,
+                    "strokeTypeKey": "drill"
+                  },
+                  "targetType": {
+                    "displayOrder": 1,
+                    "workoutTargetTypeId": 1,
+                    "workoutTargetTypeKey": "no.target"
+                  },
+                  "type": "ExecutableStepDTO"
+                },
+                {
+                  "description": "Nested repeat: fixed rest",
+                  "endCondition": {
+                    "conditionTypeId": 2,
+                    "conditionTypeKey": "time",
+                    "displayOrder": 2,
+                    "displayable": true
+                  },
+                  "endConditionValue": 20,
+                  "equipmentType": {
+                    "displayOrder": 0,
+                    "equipmentTypeId": 0,
+                    "equipmentTypeKey": null
+                  },
+                  "stepId": 8,
+                  "stepOrder": 8,
+                  "stepType": {
+                    "displayOrder": 5,
+                    "stepTypeId": 5,
+                    "stepTypeKey": "rest"
+                  },
+                  "targetType": {
+                    "displayOrder": 1,
+                    "workoutTargetTypeId": 1,
+                    "workoutTargetTypeKey": "no.target"
+                  },
+                  "type": "ExecutableStepDTO"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "description": "Stroke check: freestyle",
+          "endCondition": {
+            "conditionTypeId": 3,
+            "conditionTypeKey": "distance",
+            "displayOrder": 3,
+            "displayable": true
+          },
+          "endConditionValue": 50.0,
+          "equipmentType": {
+            "displayOrder": 0,
+            "equipmentTypeId": 0,
+            "equipmentTypeKey": null
+          },
+          "stepId": 9,
+          "stepOrder": 9,
+          "stepType": {
+            "displayOrder": 3,
+            "stepTypeId": 3,
+            "stepTypeKey": "interval"
+          },
+          "strokeType": {
+            "displayOrder": 6,
+            "strokeTypeId": 6,
+            "strokeTypeKey": "free"
+          },
+          "targetType": {
+            "displayOrder": 1,
+            "workoutTargetTypeId": 1,
+            "workoutTargetTypeKey": "no.target"
+          },
+          "type": "ExecutableStepDTO"
+        },
+        {
+          "description": "Stroke check: breaststroke",
+          "endCondition": {
+            "conditionTypeId": 3,
+            "conditionTypeKey": "distance",
+            "displayOrder": 3,
+            "displayable": true
+          },
+          "endConditionValue": 50.0,
+          "equipmentType": {
+            "displayOrder": 0,
+            "equipmentTypeId": 0,
+            "equipmentTypeKey": null
+          },
+          "stepId": 10,
+          "stepOrder": 10,
+          "stepType": {
+            "displayOrder": 3,
+            "stepTypeId": 3,
+            "stepTypeKey": "interval"
+          },
+          "strokeType": {
+            "displayOrder": 3,
+            "strokeTypeId": 3,
+            "strokeTypeKey": "breaststroke"
+          },
+          "targetType": {
+            "displayOrder": 1,
+            "workoutTargetTypeId": 1,
+            "workoutTargetTypeKey": "no.target"
+          },
+          "type": "ExecutableStepDTO"
+        },
+        {
+          "description": "Stroke check: back",
+          "endCondition": {
+            "conditionTypeId": 3,
+            "conditionTypeKey": "distance",
+            "displayOrder": 3,
+            "displayable": true
+          },
+          "endConditionValue": 50.0,
+          "equipmentType": {
+            "displayOrder": 0,
+            "equipmentTypeId": 0,
+            "equipmentTypeKey": null
+          },
+          "stepId": 11,
+          "stepOrder": 11,
+          "stepType": {
+            "displayOrder": 3,
+            "stepTypeId": 3,
+            "stepTypeKey": "interval"
+          },
+          "strokeType": {
+            "displayOrder": 2,
+            "strokeTypeId": 2,
+            "strokeTypeKey": "backstroke"
+          },
+          "targetType": {
+            "displayOrder": 1,
+            "workoutTargetTypeId": 1,
+            "workoutTargetTypeKey": "no.target"
+          },
+          "type": "ExecutableStepDTO"
+        },
+        {
+          "description": "Stroke check: butterfly",
+          "endCondition": {
+            "conditionTypeId": 3,
+            "conditionTypeKey": "distance",
+            "displayOrder": 3,
+            "displayable": true
+          },
+          "endConditionValue": 50.0,
+          "equipmentType": {
+            "displayOrder": 0,
+            "equipmentTypeId": 0,
+            "equipmentTypeKey": null
+          },
+          "stepId": 12,
+          "stepOrder": 12,
+          "stepType": {
+            "displayOrder": 3,
+            "stepTypeId": 3,
+            "stepTypeKey": "interval"
+          },
+          "strokeType": {
+            "displayOrder": 5,
+            "strokeTypeId": 5,
+            "strokeTypeKey": "fly"
+          },
+          "targetType": {
+            "displayOrder": 1,
+            "workoutTargetTypeId": 1,
+            "workoutTargetTypeKey": "no.target"
+          },
+          "type": "ExecutableStepDTO"
+        },
+        {
+          "description": "Stroke check: choice",
+          "endCondition": {
+            "conditionTypeId": 3,
+            "conditionTypeKey": "distance",
+            "displayOrder": 3,
+            "displayable": true
+          },
+          "endConditionValue": 50.0,
+          "equipmentType": {
+            "displayOrder": 0,
+            "equipmentTypeId": 0,
+            "equipmentTypeKey": null
+          },
+          "stepId": 13,
+          "stepOrder": 13,
+          "stepType": {
+            "displayOrder": 3,
+            "stepTypeId": 3,
+            "stepTypeKey": "interval"
+          },
+          "strokeType": {
+            "displayOrder": 1,
+            "strokeTypeId": 1,
+            "strokeTypeKey": "any_stroke"
+          },
+          "targetType": {
+            "displayOrder": 1,
+            "workoutTargetTypeId": 1,
+            "workoutTargetTypeKey": "no.target"
+          },
+          "type": "ExecutableStepDTO"
+        },
+        {
+          "description": "Stroke check: individual medley",
+          "endCondition": {
+            "conditionTypeId": 3,
+            "conditionTypeKey": "distance",
+            "displayOrder": 3,
+            "displayable": true
+          },
+          "endConditionValue": 50.0,
+          "equipmentType": {
+            "displayOrder": 0,
+            "equipmentTypeId": 0,
+            "equipmentTypeKey": null
+          },
+          "stepId": 14,
+          "stepOrder": 14,
+          "stepType": {
+            "displayOrder": 3,
+            "stepTypeId": 3,
+            "stepTypeKey": "interval"
+          },
+          "strokeType": {
+            "displayOrder": 7,
+            "strokeTypeId": 7,
+            "strokeTypeKey": "individual_medley"
+          },
+          "targetType": {
+            "displayOrder": 1,
+            "workoutTargetTypeId": 1,
+            "workoutTargetTypeKey": "no.target"
+          },
+          "type": "ExecutableStepDTO"
+        },
+        {
+          "description": "Stroke check: IM by round",
+          "endCondition": {
+            "conditionTypeId": 3,
+            "conditionTypeKey": "distance",
+            "displayOrder": 3,
+            "displayable": true
+          },
+          "endConditionValue": 50.0,
+          "equipmentType": {
+            "displayOrder": 0,
+            "equipmentTypeId": 0,
+            "equipmentTypeKey": null
+          },
+          "stepId": 15,
+          "stepOrder": 15,
+          "stepType": {
+            "displayOrder": 3,
+            "stepTypeId": 3,
+            "stepTypeKey": "interval"
+          },
+          "strokeType": {
+            "displayOrder": 9,
+            "strokeTypeId": 9,
+            "strokeTypeKey": "individual_medley_by_round"
+          },
+          "targetType": {
+            "displayOrder": 1,
+            "workoutTargetTypeId": 1,
+            "workoutTargetTypeKey": "no.target"
+          },
+          "type": "ExecutableStepDTO"
+        },
+        {
+          "description": "Stroke check: reverse IM order",
+          "endCondition": {
+            "conditionTypeId": 3,
+            "conditionTypeKey": "distance",
+            "displayOrder": 3,
+            "displayable": true
+          },
+          "endConditionValue": 50.0,
+          "equipmentType": {
+            "displayOrder": 0,
+            "equipmentTypeId": 0,
+            "equipmentTypeKey": null
+          },
+          "stepId": 16,
+          "stepOrder": 16,
+          "stepType": {
+            "displayOrder": 3,
+            "stepTypeId": 3,
+            "stepTypeKey": "interval"
+          },
+          "strokeType": {
+            "displayOrder": 10,
+            "strokeTypeId": 10,
+            "strokeTypeKey": "reverse_individual_medley_by_round"
+          },
+          "targetType": {
+            "displayOrder": 1,
+            "workoutTargetTypeId": 1,
+            "workoutTargetTypeKey": "no.target"
+          },
+          "type": "ExecutableStepDTO"
+        },
+        {
+          "description": "Stroke check: mixed",
+          "endCondition": {
+            "conditionTypeId": 3,
+            "conditionTypeKey": "distance",
+            "displayOrder": 3,
+            "displayable": true
+          },
+          "endConditionValue": 50.0,
+          "equipmentType": {
+            "displayOrder": 0,
+            "equipmentTypeId": 0,
+            "equipmentTypeKey": null
+          },
+          "stepId": 17,
+          "stepOrder": 17,
+          "stepType": {
+            "displayOrder": 3,
+            "stepTypeId": 3,
+            "stepTypeKey": "interval"
+          },
+          "strokeType": {
+            "displayOrder": 8,
+            "strokeTypeId": 8,
+            "strokeTypeKey": "mixed"
+          },
+          "targetType": {
+            "displayOrder": 1,
+            "workoutTargetTypeId": 1,
+            "workoutTargetTypeKey": "no.target"
+          },
+          "type": "ExecutableStepDTO"
+        },
+        {
+          "description": "Manual stop with Lap Button",
+          "endCondition": {
+            "conditionTypeId": 1,
+            "conditionTypeKey": "lap.button",
+            "displayOrder": 1,
+            "displayable": true
+          },
+          "endConditionValue": 1,
+          "equipmentType": {
+            "displayOrder": 0,
+            "equipmentTypeId": 0,
+            "equipmentTypeKey": null
+          },
+          "stepId": 18,
+          "stepOrder": 18,
+          "stepType": {
+            "displayOrder": 2,
+            "stepTypeId": 2,
+            "stepTypeKey": "cooldown"
+          },
+          "targetType": {
+            "displayOrder": 1,
+            "workoutTargetTypeId": 1,
+            "workoutTargetTypeKey": "no.target"
+          },
+          "type": "ExecutableStepDTO"
+        }
+      ]
+    }
+  ]
+}

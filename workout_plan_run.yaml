@@ -1,0 +1,101 @@
+# Stress-test plan for sync_workouts.py (running)
+# Exercises:
+# - durations: lap / time / distance
+# - targets: no.target / HR zone / pace range / cadence range / power range
+# - repeat groups: single + nested
+
+settings:
+  sportType: running
+  deleteSameNameWorkout: false
+
+workouts:
+  "Ultimate Script Stress Test 2026":
+    description: "Tests all duration types, target types, and repeat structures."
+    steps:
+      - warmup:
+          detail: 10min @H(z2)
+          notes: "Target: Heart Rate Zone 2"
+
+      - repeat(5):
+          - run:
+              detail: 800m @P(3:40-3:20)
+              notes: "800m at Pace Range (converted to m/s)"
+          - recovery:
+              detail: 60sec
+              notes: "Recovery (time-based)"
+
+      - repeat(2):
+          - repeat(3):
+              - run:
+                  detail: 30sec @P(4:00-3:50)
+                  notes: "Nested repeat: short reps"
+              - recovery:
+                  detail: 30sec
+                  notes: "Nested repeat: short recovery"
+
+      - run:
+          detail: 1000m @C(180-195)
+          notes: "1km at High Cadence (180-195 spm)"
+
+      - run:
+          detail: 300sec @W(250-280)
+          notes: "Power Target Step (Watts)"
+
+      - cooldown:
+          detail: lap
+          notes: "Manual stop with Lap Button"
+
+  "Run Intensity Target Matrix 2026":
+    description: "Matrix of Garmin Connect running intensity target modes for manual verification + reverse engineering."
+    steps:
+      - warmup:
+          detail: 10min
+          notes: "Baseline: No target (default)"
+
+      # Duration type coverage (manual in app): time / distance / HR / calories
+      - run:
+          detail: 400m
+          notes: "DURATION: distance (generated)"
+
+      - run:
+          detail: 2min
+          notes: "DURATION: time (generated)"
+
+      - run:
+          detail: 50cal
+          notes: "DURATION: calories (generated)"
+
+      - run:
+          detail: 2min
+          notes: "DURATION: MANUAL -> change duration type to Heart Rate"
+
+      - run:
+          detail: 5min @H(z2)
+          notes: "Control: Heart Rate Zone 2"
+
+      - run:
+          detail: 1km @P(5:00-4:50)
+          notes: "CHECK: Target Pace range (min/km)"
+
+      - run:
+          detail: 2min @C(170-180)
+          notes: "CHECK: Cadence target (spm)"
+
+      - run:
+          detail: 2min @W(220-240)
+          notes: "CHECK: Power target (watts)"
+
+      # Intensity targets seen in the app that we don't tokenize yet.
+      - recovery:
+          detail: 1min @HR(120-130)
+          notes: "Custom HR target: 120-130 bpm"
+
+      - cooldown:
+          detail: 5min
+          notes: "End"
+
+schedulePlan:
+    start_from: 2026-02-22
+    workouts:
+        - "Ultimate Script Stress Test 2026"
+        - "Run Intensity Target Matrix 2026"

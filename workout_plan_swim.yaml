@@ -1,0 +1,183 @@
+# Pool swim stress-test plan for sync_workouts.py
+#
+# Goals:
+# - Exercise repeat structures (including nested repeats)
+# - Exercise multiple duration types (time, distance, lap button)
+# - Exercise swim pace targets (@SP) which are converted to m/s
+# - Exercise swim stroke/equipment fields
+# - Demonstrate the "meter rule": even if poolLengthUnit is yards, distance endConditionValue is still meters.
+#
+# Notes:
+# - Garmin Connect payload schemas vary. For rare end conditions (e.g. HR less-than, fixed send-off),
+#   use the per-step override fields: endCondition/endConditionValue.
+
+settings:
+  sportType: pool_swim
+  poolLength: 50
+  poolLengthUnit: meter
+
+workouts:
+  "Ultimate Script Stress Test 2026":
+    description: "Tests all duration types, target types, and repeat structures."
+    steps:
+      - warmup:
+          detail: 10min @H(z2)
+          notes: "Target: Heart Rate Zone 2"
+
+      # 5x main set with swim pace target (m/s)
+      - repeat(5):
+          - main:
+              detail: 800m @SP(1:50-1:40)
+              notes: "800m at Swim Pace Range per 100m (converted to m/s)"
+              stroke: freestyle
+              equipment: none
+
+          # Garmin-specific condition: recover until HR drops below 120bpm.
+          # We don't tokenize this condition yet; we express it via endCondition override.
+          - recovery:
+              detail: 60sec
+              notes: "Fixed recovery (safe default)."
+              targetType:
+                workoutTargetTypeId: 1
+                workoutTargetTypeKey: no.target
+
+      # Nested repeat blocks to stress-test JSON nesting.
+      - repeat(2):
+          - repeat(3):
+              - main:
+                  detail: 50m
+                  notes: "Nested repeat: drill"
+                  stroke: drill
+                  equipment: kickboard
+              - rest:
+                  detail: 20sec
+                  notes: "Nested repeat: fixed rest"
+
+      # Stroke type checks (for manual verification + reverse engineering)
+      #
+      # Notes:
+      # - Some Garmin accounts store slightly different strokeTypeKey values than we send.
+      # - If a step doesn't show the expected stroke in the UI, set it manually in the app,
+      #   then re-run: python inspect_workout_schema.py --sport-key swimming --name-contains "Ultimate Script Stress Test"
+      - main:
+          detail: 50m
+          notes: "Stroke check: freestyle"
+          stroke: freestyle
+
+      - main:
+          detail: 50m
+          notes: "Stroke check: breaststroke"
+          stroke: breaststroke
+
+      - main:
+          detail: 50m
+          notes: "Stroke check: back"
+          stroke: back
+
+      - main:
+          detail: 50m
+          notes: "Stroke check: butterfly"
+          stroke: butterfly
+
+      - main:
+          detail: 50m
+          notes: "Stroke check: choice"
+          stroke: choice
+
+      - main:
+          detail: 50m
+          notes: "Stroke check: individual medley"
+          stroke: individual_medley
+
+      - main:
+          detail: 50m
+          notes: "Stroke check: IM by round"
+          stroke: individual_medley_by_round
+
+      - main:
+          detail: 50m
+          notes: "Stroke check: reverse IM order"
+          stroke: reverse_individual_medley_by_round
+
+      - main:
+          detail: 50m
+          notes: "Stroke check: mixed"
+          stroke: mixed
+
+      - cooldown:
+          detail: lap
+          notes: "Manual stop with Lap Button"
+
+  "Swim Intensity Target Matrix 2026":
+    description: "Matrix of Garmin Connect swim intensity target modes for manual verification + reverse engineering."
+    steps:
+      - warmup:
+          detail: 200m
+          notes: "Baseline: No target (default)"
+
+      - main:
+          detail: 100m @H(z2)
+          notes: "Control: Heart Rate Zone 2"
+
+      # Target Pace (single pace) - expected to show as Target Pace in the app.
+      - main:
+          detail: 100m @SP(1:50)
+          notes: "EXPECT: Target Pace = 1:50/100m"
+
+      # Range provided, but generator collapses swim pace range to the slower bound.
+      - main:
+          detail: 100m @SP(1:50-1:40)
+          notes: "EXPECT: Target Pace = 1:50/100m (range collapsed)"
+
+      # Edge cases: different durations while keeping swim pace target.
+      - main:
+          detail: 45sec @SP(1:50)
+          notes: "CHECK: time-based step + Target Pace"
+
+      - main:
+          detail: lap @SP(1:50)
+          notes: "CHECK: lap-button step + Target Pace"
+
+      # The following target modes are not tokenized yet. Create placeholder steps,
+      # These were reverse-engineered from Garmin and are now tokenized.
+      - recovery:
+          detail: 50m @SI(descending)
+          notes: "Effort-Based: Descending"
+
+      - recovery:
+          detail: 50m @SI(ascending)
+          notes: "Effort-Based: Ascending"
+
+      - recovery:
+          detail: 50m @SI(recovery)
+          notes: "Effort-Based: Recovery"
+
+      - recovery:
+          detail: 50m @SI(easy)
+          notes: "Effort-Based: Easy"
+
+      - recovery:
+          detail: 50m @SI(moderate)
+          notes: "Effort-Based: Moderate"
+
+      - recovery:
+          detail: 50m @SI(hard)
+          notes: "Effort-Based: Hard"
+
+      - recovery:
+          detail: 50m @SI(very_hard)
+          notes: "Effort-Based: Very Hard"
+
+      - recovery:
+          detail: 50m @SI(all_out)
+          notes: "Effort-Based: All Out"
+
+      - recovery:
+          detail: 50m @CSS(-1)
+          notes: "CSS Based Target Pace: offset -1 sec"
+
+schedulePlan:
+  start_from: "2026-02-23"
+  workouts:
+    - "Ultimate Script Stress Test 2026"
+    - "Swim Intensity Target Matrix 2026"

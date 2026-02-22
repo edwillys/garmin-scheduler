@@ -12,3 +12,8 @@ num_last_activities = 5
 #   "summary"  -> only /activity-service/activity/{id}
 #   "detailed" -> adds /details (laps/splits/metrics when available)
 detail_level = "detailed"
+
+[workouts]
+# When importing workouts, delete any existing workout(s) with the same workoutName.
+# This mirrors the option used by the referenced garmin_planner project.
+deleteSameNameWorkout = true

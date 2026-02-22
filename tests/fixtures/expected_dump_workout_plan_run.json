@@ -1,0 +1,286 @@
+{
+  "avgTrainingSpeed": null,
+  "description": "Tests all duration types, target types, and repeat structures.",
+  "estimateType": null,
+  "estimatedDistanceInMeters": null,
+  "estimatedDistanceUnit": null,
+  "estimatedDurationInSecs": null,
+  "sportType": {
+    "displayOrder": 1,
+    "sportTypeId": 1,
+    "sportTypeKey": "running"
+  },
+  "subSportType": null,
+  "workoutName": "Ultimate Script Stress Test 2026",
+  "workoutSegments": [
+    {
+      "segmentOrder": 1,
+      "sportType": {
+        "displayOrder": 1,
+        "sportTypeId": 1,
+        "sportTypeKey": "running"
+      },
+      "workoutSteps": [
+        {
+          "description": "Target: Heart Rate Zone 2",
+          "endCondition": {
+            "conditionTypeId": 2,
+            "conditionTypeKey": "time",
+            "displayOrder": 2,
+            "displayable": true
+          },
+          "endConditionValue": 600,
+          "stepId": 1,
+          "stepOrder": 1,
+          "stepType": {
+            "displayOrder": 1,
+            "stepTypeId": 1,
+            "stepTypeKey": "warmup"
+          },
+          "targetType": {
+            "displayOrder": 4,
+            "workoutTargetTypeId": 4,
+            "workoutTargetTypeKey": "heart.rate.zone"
+          },
+          "type": "ExecutableStepDTO",
+          "zoneNumber": 2
+        },
+        {
+          "childStepId": 1,
+          "endCondition": {
+            "conditionTypeId": 7,
+            "conditionTypeKey": "iterations",
+            "displayOrder": 7,
+            "displayable": false
+          },
+          "numberOfIterations": 5,
+          "skipLastRestStep": false,
+          "smartRepeat": false,
+          "stepId": 2,
+          "stepOrder": 2,
+          "stepType": {
+            "displayOrder": 6,
+            "stepTypeId": 6,
+            "stepTypeKey": "repeat"
+          },
+          "type": "RepeatGroupDTO",
+          "workoutSteps": [
+            {
+              "description": "800m at Pace Range (converted to m/s)",
+              "endCondition": {
+                "conditionTypeId": 3,
+                "conditionTypeKey": "distance",
+                "displayOrder": 3,
+                "displayable": true
+              },
+              "endConditionValue": 800.0,
+              "stepId": 3,
+              "stepOrder": 3,
+              "stepType": {
+                "displayOrder": 3,
+                "stepTypeId": 3,
+                "stepTypeKey": "interval"
+              },
+              "targetType": {
+                "displayOrder": 6,
+                "workoutTargetTypeId": 6,
+                "workoutTargetTypeKey": "pace.zone"
+              },
+              "targetValueOne": 4.545452727272727,
+              "targetValueTwo": 4.999998,
+              "type": "ExecutableStepDTO"
+            },
+            {
+              "description": "Recovery (time-based)",
+              "endCondition": {
+                "conditionTypeId": 2,
+                "conditionTypeKey": "time",
+                "displayOrder": 2,
+                "displayable": true
+              },
+              "endConditionValue": 60,
+              "stepId": 4,
+              "stepOrder": 4,
+              "stepType": {
+                "displayOrder": 4,
+                "stepTypeId": 4,
+                "stepTypeKey": "recovery"
+              },
+              "targetType": {
+                "displayOrder": 1,
+                "workoutTargetTypeId": 1,
+                "workoutTargetTypeKey": "no.target"
+              },
+              "type": "ExecutableStepDTO"
+            }
+          ]
+        },
+        {
+          "childStepId": 1,
+          "endCondition": {
+            "conditionTypeId": 7,
+            "conditionTypeKey": "iterations",
+            "displayOrder": 7,
+            "displayable": false
+          },
+          "numberOfIterations": 2,
+          "skipLastRestStep": false,
+          "smartRepeat": false,
+          "stepId": 5,
+          "stepOrder": 5,
+          "stepType": {
+            "displayOrder": 6,
+            "stepTypeId": 6,
+            "stepTypeKey": "repeat"
+          },
+          "type": "RepeatGroupDTO",
+          "workoutSteps": [
+            {
+              "childStepId": 1,
+              "endCondition": {
+                "conditionTypeId": 7,
+                "conditionTypeKey": "iterations",
+                "displayOrder": 7,
+                "displayable": false
+              },
+              "numberOfIterations": 3,
+              "skipLastRestStep": false,
+              "smartRepeat": false,
+              "stepId": 6,
+              "stepOrder": 6,
+              "stepType": {
+                "displayOrder": 6,
+                "stepTypeId": 6,
+                "stepTypeKey": "repeat"
+              },
+              "type": "RepeatGroupDTO",
+              "workoutSteps": [
+                {
+                  "description": "Nested repeat: short reps",
+                  "endCondition": {
+                    "conditionTypeId": 2,
+                    "conditionTypeKey": "time",
+                    "displayOrder": 2,
+                    "displayable": true
+                  },
+                  "endConditionValue": 30,
+                  "stepId": 7,
+                  "stepOrder": 7,
+                  "stepType": {
+                    "displayOrder": 3,
+                    "stepTypeId": 3,
+                    "stepTypeKey": "interval"
+                  },
+                  "targetType": {
+                    "displayOrder": 6,
+                    "workoutTargetTypeId": 6,
+                    "workoutTargetTypeKey": "pace.zone"
+                  },
+                  "targetValueOne": 4.166665,
+                  "targetValueTwo": 4.347824347826087,
+                  "type": "ExecutableStepDTO"
+                },
+                {
+                  "description": "Nested repeat: short recovery",
+                  "endCondition": {
+                    "conditionTypeId": 2,
+                    "conditionTypeKey": "time",
+                    "displayOrder": 2,
+                    "displayable": true
+                  },
+                  "endConditionValue": 30,
+                  "stepId": 8,
+                  "stepOrder": 8,
+                  "stepType": {
+                    "displayOrder": 4,
+                    "stepTypeId": 4,
+                    "stepTypeKey": "recovery"
+                  },
+                  "targetType": {
+                    "displayOrder": 1,
+                    "workoutTargetTypeId": 1,
+                    "workoutTargetTypeKey": "no.target"
+                  },
+                  "type": "ExecutableStepDTO"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "description": "1km at High Cadence (180-195 spm)",
+          "endCondition": {
+            "conditionTypeId": 3,
+            "conditionTypeKey": "distance",
+            "displayOrder": 3,
+            "displayable": true
+          },
+          "endConditionValue": 1000.0,
+          "stepId": 9,
+          "stepOrder": 9,
+          "stepType": {
+            "displayOrder": 3,
+            "stepTypeId": 3,
+            "stepTypeKey": "interval"
+          },
+          "targetType": {
+            "displayOrder": 3,
+            "workoutTargetTypeId": 3,
+            "workoutTargetTypeKey": "cadence"
+          },
+          "targetValueOne": 180,
+          "targetValueTwo": 195,
+          "type": "ExecutableStepDTO"
+        },
+        {
+          "description": "Power Target Step (Watts)",
+          "endCondition": {
+            "conditionTypeId": 2,
+            "conditionTypeKey": "time",
+            "displayOrder": 2,
+            "displayable": true
+          },
+          "endConditionValue": 300,
+          "stepId": 10,
+          "stepOrder": 10,
+          "stepType": {
+            "displayOrder": 3,
+            "stepTypeId": 3,
+            "stepTypeKey": "interval"
+          },
+          "targetType": {
+            "displayOrder": 5,
+            "workoutTargetTypeId": 5,
+            "workoutTargetTypeKey": "speed.zone"
+          },
+          "targetValueOne": 250.0,
+          "targetValueTwo": 280.0,
+          "type": "ExecutableStepDTO"
+        },
+        {
+          "description": "Manual stop with Lap Button",
+          "endCondition": {
+            "conditionTypeId": 1,
+            "conditionTypeKey": "lap.button",
+            "displayOrder": 1,
+            "displayable": true
+          },
+          "endConditionValue": 1,
+          "stepId": 11,
+          "stepOrder": 11,
+          "stepType": {
+            "displayOrder": 2,
+            "stepTypeId": 2,
+            "stepTypeKey": "cooldown"
+          },
+          "targetType": {
+            "displayOrder": 1,
+            "workoutTargetTypeId": 1,
+            "workoutTargetTypeKey": "no.target"
+          },
+          "type": "ExecutableStepDTO"
+        }
+      ]
+    }
+  ]
+}
