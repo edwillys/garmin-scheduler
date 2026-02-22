@@ -3,17 +3,24 @@
 This is a dev helper (not used by production CLIs).
 
 Usage:
-  python regen_fixtures.py
+    python tools/regen_fixtures.py
 """
 
 from __future__ import annotations
 
 import json
+import sys
 from pathlib import Path
 
 import yaml
 
-import workout_builder
+# Allow running this tool without installing the package.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_SRC_DIR = _REPO_ROOT / "src"
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
+
+from garmin_scheduler import workout_builder  # noqa: E402
 
 
 def _regen_plan_fixture(*, plan_path: Path, workout_name: str, out_path: Path) -> None:

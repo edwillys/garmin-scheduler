@@ -1,10 +1,17 @@
 import json
+import sys
 import unittest
 from pathlib import Path
 
 import yaml
 
-import workout_builder
+# Allow running tests without installing the package.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_SRC_DIR = _REPO_ROOT / "src"
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
+
+from garmin_scheduler import workout_builder  # noqa: E402
 
 
 class TestDumpJsonReference(unittest.TestCase):

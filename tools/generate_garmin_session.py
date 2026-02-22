@@ -6,7 +6,7 @@ run this script to produce the base64-encoded value to store as the
 GARMIN_SESSION GitHub Actions secret.
 
 Usage:
-    python generate_garmin_session.py [--garth-dir .garth]
+    python tools/generate_garmin_session.py [--garth-dir .garth]
 """
 
 import argparse

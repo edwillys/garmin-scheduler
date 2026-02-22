@@ -16,20 +16,20 @@ High-level behavior:
 
 Usage:
     # Sync from Drive (default when no plan is provided)
-    python sync_workouts.py
+    python -m garmin_scheduler.sync_workouts
 
     # Sync from a local YAML file
-    python sync_workouts.py workout_plan.yaml
+    python -m garmin_scheduler.sync_workouts workout_plan_swim.yaml
 
     # List workouts
-    python sync_workouts.py --list              # from Garmin Connect
-    python sync_workouts.py --list --from-drive # from Drive YAML plans
-    python sync_workouts.py workout_plan.yaml --list
+    python -m garmin_scheduler.sync_workouts --list              # from Garmin Connect
+    python -m garmin_scheduler.sync_workouts --list --from-drive # from Drive YAML plans
+    python -m garmin_scheduler.sync_workouts workout_plan_swim.yaml --list
 
     # List schedules
-    python sync_workouts.py --list-schedule              # from Garmin Connect
-    python sync_workouts.py --list-schedule --from-drive # from Drive YAML plans
-    python sync_workouts.py workout_plan.yaml --list-schedule
+    python -m garmin_scheduler.sync_workouts --list-schedule              # from Garmin Connect
+    python -m garmin_scheduler.sync_workouts --list-schedule --from-drive # from Drive YAML plans
+    python -m garmin_scheduler.sync_workouts workout_plan_swim.yaml --list-schedule
 
 Env vars (same as other scripts in this repo):
 - GARMIN_SESSION (required)
@@ -44,11 +44,18 @@ import argparse
 import datetime as dt
 import json
 import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from utils import (
+# Allow running as a script: `python src/garmin_scheduler/sync_workouts.py ...`
+# (relative imports require a package context).
+_SRC_DIR = Path(__file__).resolve().parents[1]
+if __package__ in (None, "") and str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
+
+from garmin_scheduler.utils import (  # noqa: E402
     download_drive_file_bytes,
     garmin_authenticate,
     garmin_delete_workout,
@@ -62,7 +69,7 @@ from utils import (
     list_drive_files,
     load_toml,
 )
-from workout_builder import (
+from garmin_scheduler.workout_builder import (  # noqa: E402
     build_workout_payload,
     parse_pool_settings,
     parse_sport_settings,
@@ -89,7 +96,10 @@ WEEKDAY_INDEX: dict[str, int] = {
 }
 
 
-SYNC_SETTINGS = load_toml(Path(__file__).with_name("sync_settings.toml"))
+_SYNC_SETTINGS_PATH = Path("sync_settings.toml")
+if not _SYNC_SETTINGS_PATH.exists():
+    _SYNC_SETTINGS_PATH = Path(__file__).resolve().parents[2] / "sync_settings.toml"
+SYNC_SETTINGS = load_toml(_SYNC_SETTINGS_PATH)
 
 
 @dataclass(frozen=True)

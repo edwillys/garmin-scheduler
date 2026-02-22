@@ -1,11 +1,35 @@
+import sys
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
-from garmin_constants import SPORT_SWIMMING
+# Allow running tests without installing the package.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_SRC_DIR = _REPO_ROOT / "src"
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
+
+from garmin_scheduler.garmin_constants import SPORT_SWIMMING  # noqa: E402
 
 
 class TestSyncWorkoutsSportType(unittest.TestCase):
+    def test_missing_garmin_session_is_user_friendly(self):
+        """Running Garmin-backed paths without GARMIN_SESSION should not crash."""
+
+        from garmin_scheduler import sync_workouts
+
+        with patch.dict("os.environ", {}, clear=False):
+            import os
+
+            os.environ.pop("GARMIN_SESSION", None)
+            with self.assertRaises(SystemExit) as ctx:
+                with patch.object(sys, "argv", ["sync_workouts.py", "--list"]):
+                    sync_workouts.main()
+
+        self.assertIn("GARMIN_SESSION", str(ctx.exception))
+
     def test_validate_sport_type(self):
-        import workout_builder
+        from garmin_scheduler import workout_builder
 
         st = workout_builder._validate_sport_type(
             {"sportTypeId": 1, "sportTypeKey": "running", "displayOrder": 1},
@@ -18,7 +42,7 @@ class TestSyncWorkoutsSportType(unittest.TestCase):
             workout_builder._validate_sport_type("running", where="x")
 
     def test_parse_sport_settings_string_running(self):
-        import workout_builder
+        from garmin_scheduler import workout_builder
 
         st, sst = workout_builder.parse_sport_settings(
             {"sportType": "running"},
@@ -29,7 +53,7 @@ class TestSyncWorkoutsSportType(unittest.TestCase):
         self.assertIsNone(sst)
 
     def test_swimming_payload_pool_length_config(self):
-        import workout_builder
+        from garmin_scheduler import workout_builder
 
         payload = workout_builder.build_workout_payload(
             "swim_test",
@@ -43,7 +67,7 @@ class TestSyncWorkoutsSportType(unittest.TestCase):
         self.assertEqual(payload.get("poolLengthUnit", {}).get("unitKey"), "meter")
 
     def test_workout_description_in_payload(self):
-        import workout_builder
+        from garmin_scheduler import workout_builder
 
         payload = workout_builder.build_workout_payload(
             "desc_test",
@@ -55,7 +79,7 @@ class TestSyncWorkoutsSportType(unittest.TestCase):
 
 class TestSyncWorkoutsSteps(unittest.TestCase):
     def test_swim_alias_builds(self):
-        import workout_builder
+        from garmin_scheduler import workout_builder
 
         steps = workout_builder.build_steps(
             [{"swim": "50m"}, {"recovery": "30sec"}],
@@ -65,7 +89,7 @@ class TestSyncWorkoutsSteps(unittest.TestCase):
         self.assertEqual(steps[0]["stepType"]["stepTypeKey"], "interval")
 
     def test_targets_cadence_and_power(self):
-        import workout_builder
+        from garmin_scheduler import workout_builder
 
         cadence = workout_builder.parse_step_detail("1000m @C(180-195)")
         self.assertEqual(cadence["targetType"]["workoutTargetTypeKey"], "cadence")
@@ -78,7 +102,7 @@ class TestSyncWorkoutsSteps(unittest.TestCase):
         self.assertEqual(power["targetValueTwo"], 280.0)
 
     def test_custom_hr_target_is_hr_zone_with_values(self):
-        import workout_builder
+        from garmin_scheduler import workout_builder
 
         step = workout_builder.parse_step_detail("60sec @HR(120-130)")
         self.assertEqual(step["targetType"]["workoutTargetTypeKey"], "heart.rate.zone")
@@ -87,7 +111,7 @@ class TestSyncWorkoutsSteps(unittest.TestCase):
         self.assertEqual(step["targetValueTwo"], 130.0)
 
     def test_swim_instruction_sets_secondary_target(self):
-        import workout_builder
+        from garmin_scheduler import workout_builder
 
         step = workout_builder.parse_step_detail(
             "50m @SI(descending)",
@@ -100,7 +124,7 @@ class TestSyncWorkoutsSteps(unittest.TestCase):
         self.assertEqual(step["secondaryTargetValueOne"], 10.0)
 
     def test_swim_css_offset_sets_secondary_target(self):
-        import workout_builder
+        from garmin_scheduler import workout_builder
 
         step = workout_builder.parse_step_detail(
             "50m @CSS(-1)",
@@ -113,7 +137,7 @@ class TestSyncWorkoutsSteps(unittest.TestCase):
         self.assertEqual(step["secondaryTargetValueOne"], -1.0)
 
     def test_pace_conversion_matches_expected_speed_range(self):
-        import workout_builder
+        from garmin_scheduler import workout_builder
 
         # 3:40 min/km -> ~4.545 m/s; 3:20 min/km -> 5.0 m/s
         step = workout_builder.parse_step_detail("800m @P(3:40-3:20)")
@@ -122,14 +146,14 @@ class TestSyncWorkoutsSteps(unittest.TestCase):
         self.assertAlmostEqual(step["targetValueTwo"], 5.0, places=2)
 
     def test_km_duration_is_converted_to_meters(self):
-        import workout_builder
+        from garmin_scheduler import workout_builder
 
         step = workout_builder.parse_step_detail("1km")
         self.assertEqual(step["endCondition"]["conditionTypeKey"], "distance")
         self.assertAlmostEqual(step["endConditionValue"], 1000.0, places=6)
 
     def test_swim_pace_uses_single_target_and_secondary_fields(self):
-        import workout_builder
+        from garmin_scheduler import workout_builder
 
         step = workout_builder.parse_step_detail(
             "800m @SP(1:50-1:40)",

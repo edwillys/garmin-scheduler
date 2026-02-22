@@ -6,12 +6,18 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import sys
 from pathlib import Path
 
 import garth
 from googleapiclient.errors import HttpError
 
-from utils import (
+# Allow running as a script: `python src/garmin_scheduler/sync_activity.py ...`
+_SRC_DIR = Path(__file__).resolve().parents[1]
+if __package__ in (None, "") and str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
+
+from garmin_scheduler.utils import (  # noqa: E402
     compute_checksum,
     explain_drive_quota_error,
     garmin_authenticate,
@@ -24,7 +30,10 @@ from utils import (
     upload_drive_json,
 )
 
-SYNC_SETTINGS = load_toml(Path(__file__).with_name("sync_settings.toml"))
+_SYNC_SETTINGS_PATH = Path("sync_settings.toml")
+if not _SYNC_SETTINGS_PATH.exists():
+    _SYNC_SETTINGS_PATH = Path(__file__).resolve().parents[2] / "sync_settings.toml"
+SYNC_SETTINGS = load_toml(_SYNC_SETTINGS_PATH)
 
 
 def get_sync_setting(name: str, default):

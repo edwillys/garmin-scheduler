@@ -4,10 +4,10 @@ This repository contains small Python CLIs that talk to Garmin Connect (via `gar
 
 ## What this repo does
 
-- `sync_activity.py`: downloads recent Garmin activities and syncs their JSON to Google Drive.
-- `sync_workouts.py`: creates Garmin workouts and schedules them on the Garmin calendar from YAML plans (local file or Google Drive).
-- `schedule_workout.py`: schedules an existing Garmin workout by name/id.
-- `generate_garmin_session.py`: helper to generate a `GARMIN_SESSION` secret.
+- `src/garmin_scheduler/sync_activity.py`: downloads recent Garmin activities and syncs their JSON to Google Drive.
+- `src/garmin_scheduler/sync_workouts.py`: creates Garmin workouts and schedules them on the Garmin calendar from YAML plans (local file or Google Drive).
+- `src/garmin_scheduler/schedule_workout.py`: schedules an existing Garmin workout by name/id.
+- `tools/generate_garmin_session.py`: helper to generate a `GARMIN_SESSION` secret.
 
 ## CLI conventions
 
@@ -23,6 +23,7 @@ This repository contains small Python CLIs that talk to Garmin Connect (via `gar
 ## Development
 
 - After changes, run formatting + lint + tests:
+	- `pip install -e .[dev]`
 	- `python -m black .`
 	- `python -m flake8 .`
 	- `python -m unittest discover -s tests -p "test_*.py"`

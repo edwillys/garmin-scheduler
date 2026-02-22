@@ -1,17 +1,25 @@
+import sys
 import unittest
+from pathlib import Path
 from unittest.mock import patch
+
+# Allow running tests without installing the package.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_SRC_DIR = _REPO_ROOT / "src"
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
 
 
 class TestSyncActivityArgs(unittest.TestCase):
     def test_help_works_without_env(self):
-        import sync_activity
+        from garmin_scheduler import sync_activity
 
         with self.assertRaises(SystemExit) as ctx:
             sync_activity.parse_args(["--help"])
         self.assertEqual(ctx.exception.code, 0)
 
     def test_parse_iso_date_validation(self):
-        import sync_activity
+        from garmin_scheduler import sync_activity
 
         self.assertEqual(
             sync_activity._parse_iso_date(
@@ -25,7 +33,7 @@ class TestSyncActivityArgs(unittest.TestCase):
 
 class TestSyncActivityBehavior(unittest.TestCase):
     def test_list_mode_does_not_touch_drive(self):
-        import sync_activity
+        from garmin_scheduler import sync_activity
 
         with (
             patch.object(sync_activity, "garmin_authenticate") as garmin_auth,
@@ -43,7 +51,7 @@ class TestSyncActivityBehavior(unittest.TestCase):
     def test_fetch_activities_in_range_paginates(self):
         import datetime as dt
 
-        import sync_activity
+        from garmin_scheduler import sync_activity
 
         page1 = [
             {

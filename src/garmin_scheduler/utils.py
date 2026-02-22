@@ -55,7 +55,27 @@ def load_dotenv(dotenv_path: Path) -> dict[str, str]:
     return values
 
 
-DOTENV_VALUES = load_dotenv(Path(__file__).with_name(".env"))
+def _load_dotenv_values() -> dict[str, str]:
+    """Load dotenv values from common locations.
+
+    Historically this repo kept `.env` at the repository root.
+    After moving to a `src/` layout, module-adjacent lookups would miss that.
+    """
+
+    repo_root = Path(__file__).resolve().parents[2]
+    candidates = [
+        Path.cwd() / ".env",
+        repo_root / ".env",
+        Path(__file__).with_name(".env"),
+    ]
+
+    merged: dict[str, str] = {}
+    for path in candidates:
+        merged.update(load_dotenv(path))
+    return merged
+
+
+DOTENV_VALUES = _load_dotenv_values()
 
 
 def get_config(name: str, default: str | None = None) -> str:
@@ -89,7 +109,13 @@ def compute_checksum(data: bytes) -> str:
 
 def garmin_authenticate() -> None:
     """Resume a Garmin session from the GARMIN_SESSION env variable."""
-    session_b64 = get_config("GARMIN_SESSION")
+    try:
+        session_b64 = get_config("GARMIN_SESSION")
+    except KeyError as exc:
+        raise SystemExit(
+            "Missing required env var GARMIN_SESSION. "
+            "Generate it with tools/generate_garmin_session.py and set it in your environment."
+        ) from exc
     session_bytes = base64.b64decode(session_b64)
 
     with tempfile.TemporaryDirectory() as tmpdir:

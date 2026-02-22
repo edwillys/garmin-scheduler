@@ -5,9 +5,9 @@ This uses your existing `GARMIN_SESSION` (a base64-encoded tar of a `.garth` ses
 just like `sync_activity.py`.
 
 Examples:
-  python schedule_workout.py --list
-  python schedule_workout.py --workout-name "ga_30min" --date 2026-02-22
-  python schedule_workout.py --workout-id 1234567890 --date 2026-02-22
+    python -m garmin_scheduler.schedule_workout --list
+    python -m garmin_scheduler.schedule_workout --workout-name "ga_30min" --date 2026-02-22
+    python -m garmin_scheduler.schedule_workout --workout-id 1234567890 --date 2026-02-22
 
 Notes:
 - This schedules an *existing* workout (by `workoutId`). It does not create workouts.
@@ -18,9 +18,20 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import sys
+from pathlib import Path
 from typing import Any
 
-from utils import garmin_authenticate, garmin_list_workouts, garmin_schedule_workout
+# Allow running as a script: `python src/garmin_scheduler/schedule_workout.py ...`
+_SRC_DIR = Path(__file__).resolve().parents[1]
+if __package__ in (None, "") and str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
+
+from garmin_scheduler.utils import (  # noqa: E402
+    garmin_authenticate,
+    garmin_list_workouts,
+    garmin_schedule_workout,
+)
 
 
 def pick_workout_id(workouts: list[dict[str, Any]], workout_name: str) -> int:

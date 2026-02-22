@@ -1,9 +1,16 @@
 import argparse
 import sys
+from pathlib import Path
 
 import garth
 
-import utils
+# Allow running this tool without installing the package.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_SRC_DIR = _REPO_ROOT / "src"
+if str(_SRC_DIR) not in sys.path:
+    sys.path.insert(0, str(_SRC_DIR))
+
+from garmin_scheduler import utils  # noqa: E402
 
 
 def _walk_steps(steps: list[dict]) -> list[dict]:

@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from garmin_constants import (
+from .garmin_constants import (
     COND_CALORIES,
     COND_DISTANCE,
     COND_ITER_END,
