@@ -267,10 +267,10 @@ def main(argv: list[str] | None = None) -> None:
             print(f"{activity_id}\t{when}\t{name}")
         return
 
-    gdrive_folder_id = get_config("GDRIVE_FOLDER_ID_SWIMMING_DATA", default="")
+    gdrive_folder_id = get_config("GDRIVE_FOLDER_ID_ACTIVITY_DATA", default="")
     if not gdrive_folder_id:
         raise SystemExit(
-            "Missing Drive folder id. Set GDRIVE_FOLDER_ID_SWIMMING_DATA. "
+            "Missing Drive folder id. Set GDRIVE_FOLDER_ID_ACTIVITY_DATA. "
             "(This is not required for --list.)"
         )
 

@@ -22,7 +22,7 @@ Workout import settings:
 Required:
 
 - `GARMIN_SESSION`: base64 encoded tar of `.garth` (see below)
-- `GDRIVE_FOLDER_ID_SWIMMING_DATA`: Drive folder id where activity JSON files are stored
+- `GDRIVE_FOLDER_ID_ACTIVITY_DATA`: Drive folder id where activity JSON files are stored
 - `GDRIVE_FOLDER_ID_WORKOUTS`: Drive folder id containing workout plan YAML files
 - `GDRIVE_CREDENTIALS`: Google credentials JSON (either OAuth client JSON or service account JSON)
 
@@ -76,7 +76,7 @@ Actions cannot complete the interactive OAuth step, so it must use an existing r
 Add these repository secrets:
 
 - `GARMIN_SESSION`
-- `GDRIVE_FOLDER_ID_SWIMMING_DATA`
+- `GDRIVE_FOLDER_ID_ACTIVITY_DATA`
 - `GDRIVE_CREDENTIALS` (OAuth client JSON)
 - `GDRIVE_TOKEN_JSON` (OAuth token JSON)
 

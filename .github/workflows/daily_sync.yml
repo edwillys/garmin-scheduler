@@ -51,7 +51,7 @@ jobs:
         env:
           GARMIN_SESSION: ${{ secrets.GARMIN_SESSION }}
           GDRIVE_CREDENTIALS: ${{ secrets.GDRIVE_CREDENTIALS }}
-          GDRIVE_FOLDER_ID_SWIMMING_DATA: ${{ secrets.GDRIVE_FOLDER_ID_SWIMMING_DATA }}
+          GDRIVE_FOLDER_ID_ACTIVITY_DATA: ${{ secrets.GDRIVE_FOLDER_ID_ACTIVITY_DATA }}
           GDRIVE_FOLDER_ID_WORKOUTS: ${{ secrets.GDRIVE_FOLDER_ID_WORKOUTS }}
           GDRIVE_TOKEN_JSON: ${{ secrets.GDRIVE_TOKEN_JSON }}
         run: python -m garmin_scheduler.sync_activity
