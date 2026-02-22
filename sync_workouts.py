@@ -48,25 +48,24 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from workout_builder import (
-    parse_pool_settings,
-    parse_sport_settings,
-    build_workout_payload,
-)
-
 from utils import (
     download_drive_file_bytes,
     garmin_authenticate,
     garmin_delete_workout,
     garmin_import_workout,
-    garmin_list_workouts,
     garmin_list_scheduled_workouts,
+    garmin_list_workouts,
     garmin_schedule_workout,
+    gdrive_service,
     get_config,
     get_toml_setting,
-    gdrive_service,
     list_drive_files,
     load_toml,
+)
+from workout_builder import (
+    build_workout_payload,
+    parse_pool_settings,
+    parse_sport_settings,
 )
 
 try:

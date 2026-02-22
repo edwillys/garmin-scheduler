@@ -6,8 +6,8 @@ from typing import Any
 import garth
 import yaml
 
-import workout_builder
 import utils
+import workout_builder
 
 
 def _walk_steps_collect_types(

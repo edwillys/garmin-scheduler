@@ -41,8 +41,9 @@ class TestSyncActivityBehavior(unittest.TestCase):
             garmin_auth.assert_called_once()
 
     def test_fetch_activities_in_range_paginates(self):
-        import sync_activity
         import datetime as dt
+
+        import sync_activity
 
         page1 = [
             {

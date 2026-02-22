@@ -10,13 +10,14 @@ from pathlib import Path
 
 import garth
 from googleapiclient.errors import HttpError
+
 from utils import (
     compute_checksum,
     explain_drive_quota_error,
     garmin_authenticate,
+    gdrive_service,
     get_config,
     get_toml_setting,
-    gdrive_service,
     list_drive_files,
     load_toml,
     update_drive_json,
